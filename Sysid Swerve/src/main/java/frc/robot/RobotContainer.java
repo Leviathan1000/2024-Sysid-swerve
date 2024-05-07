@@ -7,11 +7,13 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.keepWheelsStraight;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SysidDrivetrain;
 import frc.robot.subsystems.TurnWheelDrivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -30,6 +32,7 @@ public class RobotContainer {
   private final Drivetrain drivetrain = new Drivetrain();
   private final SysidDrivetrain sysid = new SysidDrivetrain(drivetrain);
 
+  //private final keepWheelsStraight straightWheels = new keepWheelsStraight(turnWheels);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -50,16 +53,21 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+
+    CommandScheduler.getInstance().setDefaultCommand(turnWheels, new keepWheelsStraight(turnWheels));
+
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
+    // slow
     m_driverController.a().whileTrue(sysid.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     m_driverController.b().whileTrue(sysid.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
+    // fast
     m_driverController.x().whileTrue(sysid.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    m_driverController.x().whileTrue(sysid.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    m_driverController.y().whileTrue(sysid.sysIdDynamic(SysIdRoutine.Direction.kReverse));
   }
 
   /**

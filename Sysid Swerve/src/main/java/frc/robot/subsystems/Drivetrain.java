@@ -8,8 +8,10 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -19,17 +21,17 @@ public class Drivetrain extends SubsystemBase {
   private CANSparkMax BLMotor = new CANSparkMax(3, MotorType.kBrushless);
 
   private double gearRatio = 6.12/1;
-  private double metersPerWheelRotation = 2 * Math.PI * Units.inchesToMeters(4);
+  private double metersPerWheelRotation = Math.PI * Units.inchesToMeters(4);
   /** Creates a new Drivetrain. */
   public Drivetrain() {
     BRMotor.follow(FRMotor);
     BLMotor.follow(FLMotor);
     
-    FRMotor.getEncoder().setPositionConversionFactor(gearRatio/metersPerWheelRotation); // rotations per meter
-    FLMotor.getEncoder().setPositionConversionFactor(gearRatio/metersPerWheelRotation);
+    FRMotor.getEncoder().setPositionConversionFactor(metersPerWheelRotation/gearRatio); // rotations per meter
+    FLMotor.getEncoder().setPositionConversionFactor(metersPerWheelRotation/gearRatio);
 
-    FRMotor.getEncoder().setVelocityConversionFactor(gearRatio/metersPerWheelRotation * 60);
-    FLMotor.getEncoder().setVelocityConversionFactor(gearRatio/metersPerWheelRotation * 60);
+    FRMotor.getEncoder().setVelocityConversionFactor((metersPerWheelRotation/gearRatio) / 60);
+    FLMotor.getEncoder().setVelocityConversionFactor((metersPerWheelRotation/gearRatio) / 60);
   }
 
   @Override
@@ -40,10 +42,10 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void setSpeedFR(double speed) {
-    FRMotor.setVoltage(speed);
+    FRMotor.set(speed / RobotController.getBatteryVoltage());
   }
   public void setSpeedFL(double speed) {
-    FLMotor.setVoltage(speed);
+    FLMotor.set(speed / RobotController.getBatteryVoltage());
   }
 
   public void setSpeed(double speed) {
@@ -52,10 +54,10 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double getVoltageFR() {
-    return FRMotor.getBusVoltage();
+    return FRMotor.get() * FRMotor.getBusVoltage();
   }
   public double getVoltageFL() {
-    return FLMotor.getBusVoltage();
+    return FLMotor.get() * FLMotor.getBusVoltage();
   }
 
   public double getDistanceFR() {

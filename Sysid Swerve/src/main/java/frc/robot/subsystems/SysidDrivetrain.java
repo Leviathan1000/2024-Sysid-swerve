@@ -25,6 +25,9 @@ public class SysidDrivetrain extends SubsystemBase {
   
 
   private Drivetrain drivetrain;
+  
+  private final MutableMeasure<Voltage> maxVoltage = MutableMeasure.mutable(Units.Volts.of(12));
+
 
   private final MutableMeasure<Voltage> appliedVoltage = MutableMeasure.mutable(Units.Volts.of(0));
 
@@ -33,7 +36,7 @@ public class SysidDrivetrain extends SubsystemBase {
   private final MutableMeasure<Velocity<Distance>> velocity = MutableMeasure.mutable(Units.MetersPerSecond.of(0));
 
   private SysIdRoutine sysId = new SysIdRoutine(
-                        new SysIdRoutine.Config(), 
+                        new SysIdRoutine.Config(null, maxVoltage, null),
                         new SysIdRoutine.Mechanism(
                                     (Measure<Voltage> volts) -> {
                                       drivetrain.setSpeedFL(volts.in(Units.Volts));
@@ -41,14 +44,14 @@ public class SysidDrivetrain extends SubsystemBase {
                                     }, 
                                     log -> {
                                       log.motor("drive-left")
-                                      .voltage(appliedVoltage.mut_replace(drivetrain.getVoltageFL() * RobotController.getBatteryVoltage(), Units.Volts))
+                                      .voltage(appliedVoltage.mut_replace(drivetrain.getVoltageFL(), Units.Volts))
                                       .linearPosition(distance.mut_replace(drivetrain.getDistanceFL(), Units.Meters))
                                       .linearVelocity(velocity.mut_replace(drivetrain.getVelocityFL(), Units.MetersPerSecond));
 
-                                      log.motor("drive-right")
-                                      .voltage(appliedVoltage.mut_replace(drivetrain.getVoltageFR() * RobotController.getBatteryVoltage(), Units.Volts))
-                                      .linearPosition(distance.mut_replace(drivetrain.getDistanceFR(), Units.Meters))
-                                      .linearVelocity(velocity.mut_replace(drivetrain.getVelocityFR(), Units.MetersPerSecond));
+                                      // log.motor("drive-right")
+                                      // .voltage(appliedVoltage.mut_replace(drivetrain.getVoltageFR(), Units.Volts))
+                                      // .linearPosition(distance.mut_replace(drivetrain.getDistanceFR(), Units.Meters))
+                                      // .linearVelocity(velocity.mut_replace(drivetrain.getVelocityFR(), Units.MetersPerSecond));
                                     },
                                     this));
 
@@ -61,11 +64,12 @@ public class SysidDrivetrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
+  // slow
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return sysId.quasistatic(direction);
   }
 
+  // fast
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
   }
