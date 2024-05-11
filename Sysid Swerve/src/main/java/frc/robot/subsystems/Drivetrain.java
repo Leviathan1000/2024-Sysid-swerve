@@ -5,13 +5,12 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -24,6 +23,17 @@ public class Drivetrain extends SubsystemBase {
   private double metersPerWheelRotation = Math.PI * Units.inchesToMeters(4);
   /** Creates a new Drivetrain. */
   public Drivetrain() {
+
+    FRMotor.setOpenLoopRampRate(0);
+    FLMotor.setOpenLoopRampRate(0);
+    BRMotor.setOpenLoopRampRate(0);
+    BLMotor.setOpenLoopRampRate(0);
+
+    FRMotor.setIdleMode(IdleMode.kBrake);
+    FLMotor.setIdleMode(IdleMode.kBrake);
+    BRMotor.setIdleMode(IdleMode.kBrake);
+    BLMotor.setIdleMode(IdleMode.kBrake);
+
     BRMotor.follow(FRMotor);
     BLMotor.follow(FLMotor);
     
@@ -32,6 +42,7 @@ public class Drivetrain extends SubsystemBase {
 
     FRMotor.getEncoder().setVelocityConversionFactor((metersPerWheelRotation/gearRatio) / 60);
     FLMotor.getEncoder().setVelocityConversionFactor((metersPerWheelRotation/gearRatio) / 60);
+
   }
 
   @Override
@@ -53,12 +64,14 @@ public class Drivetrain extends SubsystemBase {
     FLMotor.setVoltage(speed);
   }
 
+
   public double getVoltageFR() {
-    return FRMotor.get() * FRMotor.getBusVoltage();
+    return FRMotor.get() * RobotController.getBatteryVoltage();
   }
   public double getVoltageFL() {
-    return FLMotor.get() * FLMotor.getBusVoltage();
+    return FLMotor.get() * RobotController.getBatteryVoltage();
   }
+
 
   public double getDistanceFR() {
     return FRMotor.getEncoder().getPosition();
@@ -66,6 +79,7 @@ public class Drivetrain extends SubsystemBase {
   public double getDistanceFL() {
     return FLMotor.getEncoder().getPosition();
   }
+
 
   public double getVelocityFR() {
     return FRMotor.getEncoder().getVelocity();
